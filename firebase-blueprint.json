@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "A student registered in the system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "course": { "type": "string" },
+        "registeredPhotos": { "type": "array", "items": { "type": "string" } },
+        "lastDetected": { "type": "number" }
+      },
+      "required": ["id", "name", "email", "course", "registeredPhotos"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "A record of a student's attendance for a specific day",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "entryTime": { "type": "number" },
+        "exitTime": { "type": "number" },
+        "status": { "type": "string", "enum": ["IN", "OUT", "INCOMPLETE", "ABSENT"] },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "studentId", "studentName", "entryTime", "status", "date"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Collection of registered students"
+    },
+    "/attendance/{recordId}": {
+      "schema": "AttendanceRecord",
+      "description": "Collection of attendance records"
+    }
+  }
+}

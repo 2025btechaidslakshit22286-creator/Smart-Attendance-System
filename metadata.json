@@ -1,0 +1,7 @@
+{
+  "name": "Smart Face-Recognition Attendance System",
+  "description": "A high-end AI-powered attendance system featuring real-time face recognition, auto-break logic, and teacher dashboard.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: students
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (required)
+    //   - email: string (required)
+    //   - course: string (required)
+    //   - registeredPhotos: list of strings (required)
+    //   - lastDetected: number (optional)
+    //
+    // Collection: attendance
+    // Fields:
+    //   - id: string (required)
+    //   - studentId: string (required)
+    //   - studentName: string (required)
+    //   - entryTime: number (required)
+    //   - exitTime: number (optional)
+    //   - status: string (required, ['IN', 'OUT', 'INCOMPLETE', 'ABSENT'])
+    //   - date: string (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        request.auth.token.email == "lakshitpareek05@gmail.com"
+      );
+    }
+
+    function isValidStudent(data) {
+      return data.keys().hasAll(['name', 'email', 'course', 'registeredPhotos']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.course is string &&
+             data.registeredPhotos is list && data.registeredPhotos.size() > 0 && data.registeredPhotos.size() <= 5;
+    }
+
+    function isValidAttendance(data) {
+      return data.keys().hasAll(['studentId', 'studentName', 'entryTime', 'status', 'date']) &&
+             data.studentId is string &&
+             data.studentName is string &&
+             data.entryTime is number &&
+             data.status in ['IN', 'OUT', 'INCOMPLETE', 'ABSENT'] &&
+             data.date is string;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+
+    match /students/{studentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /attendance/{recordId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}
